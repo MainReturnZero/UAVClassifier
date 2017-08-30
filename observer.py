@@ -27,8 +27,16 @@ class Observer(object):
     def packets(self, packets):
         self._packets = packets
 
-    def timer(self):
-        plotter = Plotter(range(self.size), [[packet.time_stamp for packet in self.packets]], 'plots/timer.pdf')
+    def receive_timer(self):
+        plotter = Plotter(range(self.size), [[packet.time_stamp for packet in self.packets]], 'plots/receive_timer.pdf')
+        plotter.plot()
+
+    def send_timer(self):
+        plotter = Plotter(range(self.size), [[packet.mac_time for packet in self.packets]], 'plots/send_timer.pdf')
+        plotter.plot()
+
+    def signaler(self):
+        plotter = Plotter(range(self.size), [[packet.signal for packet in self.packets]], 'plots/signaler.pdf')
         plotter.plot()
 
     def sizer(self):

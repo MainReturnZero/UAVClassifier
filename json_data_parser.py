@@ -13,6 +13,10 @@ class Packet(object):
         self._len = int(packet['_source']['layers']['frame']['frame.len'])
         self._time_stamp = float(packet['_source']['layers']['frame']['frame.time_epoch'])
         self._type = int(packet['_source']['layers']['frame']['frame.encap_type'])
+        self._type_subtype = int(packet['_source']['layers']['wlan']['wlan.fc_tree']['wlan.fc.subtype'])
+        self._mac_time = int(packet['_source']['layers']['wlan_radio']['wlan_radio.timestamp'])
+        self._signal = int(packet['_source']['layers']['wlan_radio']['wlan_radio.signal_dbm'])
+        self._channel = int(packet['_source']['layers']['wlan_radio']['wlan_radio.channel'])
 
     @property
     def len(self):
@@ -37,6 +41,38 @@ class Packet(object):
     @type.setter
     def type(self, type):
         self._type = type
+
+    @property
+    def type_subtype(self):
+        return int(self._type_subtype)
+
+    @type_subtype.setter
+    def type_subtype(self, type_subtype):
+        self._type_subtype = type_subtype
+
+    @property
+    def mac_time(self):
+        return int(self._mac_time)
+
+    @mac_time.setter
+    def mac_time(self, mac_time):
+        self._mac_time = mac_time
+
+    @property
+    def signal(self):
+        return int(self._signal)
+
+    @signal.setter
+    def signal(self, signal):
+        self._signal = signal
+
+    @property
+    def channel(self):
+        return int(self._channel)
+
+    @channel.setter
+    def channel(self, channel):
+        self._channel = channel
 
 
 def main():
