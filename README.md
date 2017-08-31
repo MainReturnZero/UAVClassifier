@@ -11,18 +11,21 @@ HOW TO USE:
 
                         [--plot <plot name>]
 
-For Developers:
-
-Ideally, the captured data should be stored in /data directory, the output plots should be stored in /plots directory
 When export data from wireshark, export it as json format:
 
     File -> Export Packet Dissections -> As JSON...
 
     Then select the packets range
 
+For Developers:
+
+Ideally, the captured data should be stored in /data directory, the output plots should be stored in /plots directory
+
 The most updated source are in 'dev' branch, however, it is not tested and unstable. The safe code is in master branch.
 
+
 The paper which explains this project can be accessed here: https://drive.google.com/drive/u/2/folders/0BygAqxtj1ASvVTRLSS1EejFfZk0
+
 You have to obtain the google drive access permission by Email yingfei@hawaii.edu
 
 When using this project repo, please cite as:
