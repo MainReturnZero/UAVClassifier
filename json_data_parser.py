@@ -10,21 +10,31 @@ def read_json(input_file):
 class Packet(object):
 
     def __init__(self, packet):
-        self._len = int(packet['_source']['layers']['frame']['frame.len'])
-        self._time_stamp = float(packet['_source']['layers']['frame']['frame.time_epoch'])
-        self._type = int(packet['_source']['layers']['frame']['frame.encap_type'])
-        self._type_subtype = int(packet['_source']['layers']['wlan']['wlan.fc_tree']['wlan.fc.subtype'])
-        self._mac_time = int(packet['_source']['layers']['wlan_radio']['wlan_radio.timestamp'])
-        self._signal = int(packet['_source']['layers']['wlan_radio']['wlan_radio.signal_dbm'])
-        self._channel = int(packet['_source']['layers']['wlan_radio']['wlan_radio.channel'])
+        try:
+            self._packet_size = int(packet['_source']['layers']['frame']['frame.len'])
+            self._time_stamp = float(packet['_source']['layers']['frame']['frame.time_epoch'])
+            self._type = int(packet['_source']['layers']['frame']['frame.encap_type'])
+            self._type_subtype = int(packet['_source']['layers']['wlan']['wlan.fc_tree']['wlan.fc.subtype'])
+            self._mac_time = int(packet['_source']['layers']['wlan_radio']['wlan_radio.timestamp'])
+            self._signal = int(packet['_source']['layers']['wlan_radio']['wlan_radio.signal_dbm'])
+            self._channel = int(packet['_source']['layers']['wlan_radio']['wlan_radio.channel'])
+        except KeyError:
+            self._packet_size = 0
+            self._time_stamp = 0
+            self._type = 0
+            self._type_subtype = -1
+            self._mac_time = 0
+            self._signal = 0
+            self._channel = 0
+            print "BAD PACKETS:", packet['_source']['layers']['frame']['frame.number']
 
     @property
-    def len(self):
-        return self._len
+    def packet_size(self):
+        return self._packet_size
 
-    @len.setter
-    def len(self, len):
-        self._len = int(len)
+    @packet_size.setter
+    def packet_size(self, packet_size):
+        self._packet_size = int(packet_size)
 
     @property
     def time_stamp(self):
@@ -83,7 +93,7 @@ def main():
        packets.append(packet)
 
    for packet in packets:
-       print packet.len, packet.time_stamp, packet.type
+       print packet.packet_size, packet.time_stamp, packet.type
 
 if __name__ == "__main__":
     main()
