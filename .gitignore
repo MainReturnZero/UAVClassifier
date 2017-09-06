@@ -1,6 +1,6 @@
-**/icon**
 *.pyc
 data/*
 .idea/*
 .DS_Store
-plots/*con*
+doc/Icon*
+plots/Icon*

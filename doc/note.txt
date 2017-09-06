@@ -1,0 +1,2 @@
+convert a pcap file to json:
+    tshark -r <your.pcap> -l -n -T json
