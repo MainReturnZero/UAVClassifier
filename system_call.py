@@ -1,10 +1,10 @@
 import subprocess
 import re
 
-ALL_INTERFACE = "wireshark -D"
-CAPTURE_CMD = "wireshark -I"
+ALL_INTERFACE = "tshark -D "
+CAPTURE_CMD = "tshark "     # tailed with an empty char to be safe, ex: tshark + option
 
-def find_wifi():
+def find_wifi_interface():
     ls = subprocess.Popen(ALL_INTERFACE.split(), stdout=subprocess.PIPE)
     lines = ls.stdout.readlines()
     interface = None
@@ -16,8 +16,7 @@ def find_wifi():
 
 def get_cmd(options=None):
     global CAPTURE_CMD
-    interface = find_wifi()
-    cmd = CAPTURE_CMD + ' -i ' + interface
+    cmd = CAPTURE_CMD
     if options:
         for option in options:
             cmd += option
@@ -25,8 +24,9 @@ def get_cmd(options=None):
 
 
 def capture():
-    option_file = ' -w my.pcap -c 100'
-    cmd = get_cmd([option_file])
+    option_file = [" -w my.pcap -c 100", " wlan host 28:f0:76:1c:3e:c4"]
+    cmd = get_cmd(option_file)
     subprocess.call(cmd.split())
 
-capture()
+if __name__ == "__main__":
+    capture()

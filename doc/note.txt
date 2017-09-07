@@ -1,2 +1,30 @@
-convert a pcap file to json:
+1. convert a pcap file to json:
     tshark -r <your.pcap> -l -n -T json
+2. filter MAC address on 802.11:
+    wlan host xx:xx:xx:xx:xx:xx, EX: tshark -i 7 -I -w my.pcap -c 100 wlan host 28:f0:76:1c:3e:c4
+    or wlan src xx:xx:xx:xx
+    or wlan dst xx:xx:xx:xx
+
+
+
+======================================== Other Notes ====================================================
+Display Filter
+
+A complete list of 802.11 display filter fields can be found in the wlan, wlan_mgt, and wlan_aggregate display filter references.
+
+Show only the 802.11-based traffic:
+ wlan
+Show only the 802.11-based traffic to and from 802.11 MAC address 08:00:08:15:ca:fe:
+ wlan.addr==08.00.08.15.ca.fe
+Hide beacon frames:
+ wlan.fc.type_subtype != 0x08
+Show management frames for a specific SSID:
+ wlan_mgt.ssid == "Spatula City"
+Capture Filter
+
+Newer versions of libpcap support raw 802.11 headers via the "wlan" link type. Older versions must use "ether" or "link" via fake Ethernet headers, and might not support 802.11 capture at all.
+
+Capture only the 802.11-based traffic to and from 802.11 MAC address 08:00:08:15:ca:fe:
+ wlan host 08:00:08:15:ca:fe
+Filter out beacon frames:
+ wlan[0] != 0x80
