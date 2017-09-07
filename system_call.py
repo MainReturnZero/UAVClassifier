@@ -23,10 +23,10 @@ def get_cmd(options=None):
     return cmd
 
 
-def capture():
+def test():
     option_file = [" -w my.pcap -c 100", " wlan host 28:f0:76:1c:3e:c4"]
     cmd = get_cmd(option_file)
     subprocess.call(cmd.split())
 
 if __name__ == "__main__":
-    capture()
+    test()

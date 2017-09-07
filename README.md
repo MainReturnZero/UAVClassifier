@@ -3,6 +3,12 @@ We try to identify drone model by looking into its wireless network data.
 At current stage, we assume the data is captured by wireshark. However, we should be able
 to eliminate this third party tool by using TCPDump and build our own network packet parsing tool.
 
+HOW TO CAPTURE in CLI:
+
+    usage: capture.py [-h] [--monitor] [--file <output file for captured data>]
+                  [--packet_count <packet upper limit for capturing>]
+                  [--other [<other> [<other> ...]]]
+                  
 HOW TO USE:
 
     usage: observer.py [-h] --input <input json captured data>
