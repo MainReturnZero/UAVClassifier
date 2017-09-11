@@ -1,0 +1,10 @@
+09/10/2017:
+   1: Found EAPoL in Solo 3DR data
+   2: Json format not ideal due to the existance of same key in a dictionary
+   3: sample STD for drone and controller:
+                     drone             controller 
+      sample #1: [5.494725082180457, 3.9997490039073114]
+
+   4: To tell if a source a suspicious, we can set a threadhold for the number of packets we collect from this source
+      This threadhold should consider the time span, not just the total packets, but X packtes/second
+

@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 import argparse
+import numpy as np
 from plot import Plotter
 from json_data_parser import Packet, read_json
 
 DEFAULT_PLOT_NAME = 'plot.pdf'
 PLOT_DIR = './plots/'
+VALID_PACKET_COUNT_THREADHOLD = 1000
+
 
 class Observer(object):
     def __init__(self, data_packets, observer, plot_name=DEFAULT_PLOT_NAME):
@@ -45,6 +48,16 @@ class Observer(object):
     def plot_name(self, plot_name):
         self._plot_name = plot_name
 
+    def get_addr_map(self):
+        addr_map = {}
+        for packet in self.packets:
+            if packet.sa is not None:
+                if addr_map.get(packet.get_addr_hash()):
+                    addr_map[packet.get_addr_hash()].append(packet)
+                else:
+                    addr_map[packet.get_addr_hash()] = [packet]
+        return addr_map
+
     def generate_y_data(self):
         y_data = []
         count = 0
@@ -73,6 +86,10 @@ class Observer(object):
         plotter.y_label = self.observer
         plotter.plot()
 
+    @staticmethod
+    def get_signal_sdt(data_list):
+        return np.std(data_list)
+
 def main():
     parser = argparse.ArgumentParser(description='UAV DATA Observer')
     parser.add_argument('--input', '-i', metavar='<input json captured data>', required=True)
@@ -80,8 +97,22 @@ def main():
                         choices=['packet_size', 'time_stamp', 'mac_time', 'signal'])
     parser.add_argument('--plot', '-p', metavar='<plot name>')
     args = parser.parse_args()
+    print "processing packets..."
     data_packets = read_json(args.input)
+    print "creating observer..."
     observer = Observer(data_packets, args.observer, args.plot)
+
+    addr_map = observer.get_addr_map()
+
+    stds = []
+    for addr, packets in addr_map.iteritems():
+        if len(packets) > VALID_PACKET_COUNT_THREADHOLD:
+            std = observer.get_signal_sdt([packet.signal for packet in packets])
+            stds.append(std)
+            print len(packets)
+            print "FROM: %s TO: %s STD: %s SSID: %s" % (packets[0].sa, packets[0].da, std, packets[0].ssid)
+
+    print "plotting..."
     observer.observe()
 
 if __name__ == "__main__":

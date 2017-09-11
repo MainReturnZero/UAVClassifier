@@ -5,3 +5,4 @@ data/*
 doc/Icon*
 plots/Icon*
 *.pcap
+*.json
