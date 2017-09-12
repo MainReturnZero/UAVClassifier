@@ -42,7 +42,7 @@ class Packet(object):
             self._sa = None
             self._da = None
             self._ssid = None
-            print "BAD PACKETS:", packet['_source']['layers']['frame']['frame.number']
+            # print "BAD PACKETS:", packet['_source']['layers']['frame']['frame.number']
 
         try:
             if packet['_source']['layers']['wlan_mgt'].get('wlan_mgt.tagged.all'):

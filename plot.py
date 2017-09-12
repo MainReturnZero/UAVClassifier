@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 
 class Plotter(object):
     line_style = {
-        0: 'ro',
-        1: 'gs',
-        2: 'b^'
+        0: 'r-',
+        1: 'g-',
+        2: 'b-',
     }
 
-    def __init__(self, x=None, y=[], output_file="plot.pdf", title=None, x_label=None, y_label=None):
+    def __init__(self, x=None, y=[], output_file="plot", title=None, x_label=None, y_label=None):
         self._x = x
         self._y = y
         self._output_file = output_file
@@ -66,10 +66,10 @@ class Plotter(object):
 
     def plot(self):
         for i in range(len(self.y)):
-            #plt.subplot(len(self.y), 1, i)
-            plt.plot(self.x, self.y[i], self.line_style[i])
+            plt.subplot(len(self.y), 1, i)
+            plt.plot(range(len(self.y[i])), self.y[i], self.line_style[i % 3])
             plt.xlabel(self.x_label)
-            plt.ylabel(self.y_label)
+            plt.ylabel(self.y_label[i])
         plt.title(self.title)
         plt.savefig(self.output_file, format='pdf')
         plt.show()
