@@ -1,4 +1,4 @@
-from system_call import find_wifi_interface, get_cmd
+from system_call import find_wifi_interface, get_capture_cmd
 import argparse
 import subprocess
 
@@ -121,5 +121,5 @@ if __name__ == "__main__":
                              other=' '.join(args.other),
                              )
     option_tag = options.generate()
-    cmd = get_cmd([option_tag])
+    cmd = get_capture_cmd([option_tag])
     subprocess.call(cmd.split())
