@@ -8,7 +8,7 @@ from json_data_parser import Packet, read_json
 
 DEFAULT_PLOT_NAME = str(datetime.datetime.now())
 PLOT_DIR = './plots/'
-VALID_PACKET_COUNT_THREADHOLD = 300
+VALID_PACKET_COUNT_THRESHOLD = 10
 
 
 class Observer(object):
@@ -64,7 +64,7 @@ class Observer(object):
         y_data_list = []
         addrs = []
         for addr, packet_bin in self.bins.iteritems():
-            if len(packet_bin) > VALID_PACKET_COUNT_THREADHOLD:
+            if len(packet_bin) > VALID_PACKET_COUNT_THRESHOLD:
                 y_data_list.append(packet_bin.generate_y_data(self.observer))
                 addrs.append(addr)
         plotter = Plotter(range(self.size), y_data_list)
@@ -100,7 +100,7 @@ def main():
 
     stds = []
     for addr, packets in packet_bins.iteritems():
-        if len(packets) > VALID_PACKET_COUNT_THREADHOLD:
+        if len(packets) > VALID_PACKET_COUNT_THRESHOLD:
             std = Observer.get_signal_sdt([packet.signal for packet in packets])
             stds.append(std)
             print len(packets)

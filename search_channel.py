@@ -10,7 +10,7 @@ DISASSOCIATE_CMD = BASE_CMD + ' -z'
 CHANNEL_CMD = BASE_CMD + ' -c'
 
 
-def search_channel(channel, timeout, options):
+def search_channel(channel, timeout, options, file_prefix):
     # print DISSACIATE_CMD.split()
     # print (CHANNEL_CMD+str(channel)).split()
     # return
@@ -18,6 +18,7 @@ def search_channel(channel, timeout, options):
     subprocess.call((CHANNEL_CMD + str(channel)).split())
     subprocess.call(INFO_COMD.split())
 
+    options.save_to = file_prefix + '_' + str(channel) + '.pcap'
     option_tag = options.generate()
     cmd = get_capture_cmd([option_tag])
     t = subprocess.Popen(cmd.split())
@@ -42,5 +43,5 @@ if __name__ == "__main__":
                              other=' '.join(args.other),
                              )
     for i in range(1, 12, 1):
-        search_channel(i, args.timeout, options)
+        search_channel(i, float(args.timeout), options, args.file)
 

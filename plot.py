@@ -66,7 +66,7 @@ class Plotter(object):
 
     def plot(self):
         for i in range(len(self.y)):
-            plt.subplot(len(self.y), 1, i)
+            plt.subplot(len(self.y), 1, i+1)
             plt.plot(range(len(self.y[i])), self.y[i], self.line_style[i % 3])
             plt.xlabel(self.x_label)
             plt.ylabel(self.y_label[i])
