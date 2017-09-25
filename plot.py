@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 
 class Plotter(object):
     line_style = {
-        0: 'r-',
-        1: 'g-',
-        2: 'b-',
+        0: 'r.',
+        1: 'g.',
+        2: 'b.',
     }
 
     def __init__(self, x=None, y=[], output_file="plot", title=None, x_label=None, y_label=None):

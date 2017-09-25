@@ -44,4 +44,3 @@ if __name__ == "__main__":
                              )
     for i in range(1, 12, 1):
         search_channel(i, float(args.timeout), options, args.file)
-

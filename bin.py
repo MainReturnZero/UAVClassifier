@@ -46,7 +46,7 @@ class Bin(object):
 
         if data_name == 'packet_size':
             y_data = sorted(y_data)
-        if data_name == 'time_stamp' or 'mac_time':
+        if data_name == 'time_stamp' or data_name == 'mac_time':
             minimum = getattr(self.packet_bin[0], data_name)
             y_data = [data-minimum for data in y_data]
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import argparse
 import datetime
+import subprocess
+import os
 import numpy as np
 from plot import Plotter
 from bin import Bin
@@ -79,8 +81,19 @@ class Observer(object):
                 print packet.sa, packet.da
 
     @staticmethod
-    def get_signal_sdt(data_list):
+    def get_signal_std(data_list):
         return np.std(data_list)
+
+    @staticmethod
+    def get_signal_avg(data_list):
+        return np.mean(data_list)
+
+    @staticmethod
+    def get_signal_without_3std(data_list):
+        std = np.std(data_list)
+        avg = np.mean(data_list)
+        new_data_list = [data for data in data_list if avg - 3 * std <= data <= avg + 3 * std]
+        return np.std(new_data_list)
 
 
 def main():
@@ -90,9 +103,18 @@ def main():
                         choices=['packet_size', 'time_stamp', 'mac_time', 'signal'])
     parser.add_argument('--plot', '-p', metavar='<plot name>')
     args = parser.parse_args()
-    plot_name = args.input.split('.')[0]
+
+    file_director, file_name = os.path.split(args.input)
+    plot_name = file_name.split('.')[0]
+
     print "processing packets..."
-    data_packets = read_json(args.input)
+    try:
+        data_packets = read_json(args.input)
+    except ValueError:
+        CONVERT_PCAP_TO_JSON = 'tshark -r ' + str(args.input) + ' -l -n -T json > ' + str(plot_name) + '.json'
+        os.system(CONVERT_PCAP_TO_JSON)
+        data_packets = read_json(str(plot_name) + '.json')
+
     print "creating observer..."
     observer = Observer(data_packets, args.observer, plot_name=plot_name)
 
@@ -101,10 +123,12 @@ def main():
     stds = []
     for addr, packets in packet_bins.iteritems():
         if len(packets) > VALID_PACKET_COUNT_THRESHOLD:
-            std = Observer.get_signal_sdt([packet.signal for packet in packets])
+            ## std = Observer.get_signal_without_3std([packet.signal for packet in packets])
+            std = Observer.get_signal_std([packet.signal for packet in packets])
+            avg = Observer.get_signal_avg([packet.signal for packet in packets])
             stds.append(std)
             print len(packets)
-            print "FROM: %s TO: %s STD: %s SSID: %s" % (packets[0].sa, packets[0].da, std, packets[0].ssid)
+            print "FROM: %s TO: %s STD: %s  AVG: %s SSID: %s" % (packets[0].sa, packets[0].da, std, avg, packets[0].ssid)
 
     print "plotting..."
     observer.observe()
