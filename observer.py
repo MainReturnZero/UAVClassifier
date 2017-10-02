@@ -1,16 +1,65 @@
 #!/usr/bin/env python
 import argparse
 import datetime
-import subprocess
 import os
 import numpy as np
+from constant import ADDR_BLACK_LIST, ADDR_WITHE_LIST
 from plot import Plotter
 from bin import Bin
 from json_data_parser import Packet, read_json
 
 DEFAULT_PLOT_NAME = str(datetime.datetime.now())
 PLOT_DIR = './plots/'
-VALID_PACKET_COUNT_THRESHOLD = 10
+VALID_PACKET_COUNT_THRESHOLD = 100
+
+
+def parse_search_channel_file(file, observer, plot, plot_flag):
+    file_director, file_name = os.path.split(file)
+    plot_name = file_name.split('.')[0]
+
+    print "processing packets..."
+    try:
+        data_packets = read_json(file)
+    except ValueError:
+        CONVERT_PCAP_TO_JSON = 'tshark -r ' + str(file) + ' -l -n -T json > ' + str(plot_name) + '.json'
+        os.system(CONVERT_PCAP_TO_JSON)
+        data_packets = read_json(str(plot_name) + '.json')
+
+    print "creating observer..."
+    observer = Observer(data_packets, observer, plot_name=plot)
+
+    packet_bins = observer.sort_in_bins()
+
+    stds = []
+    flag = False
+    for addr, packets in packet_bins.iteritems():
+        addr_flag = False
+        SSID_flag = False
+        std_flag = False
+
+        if len(packets) > VALID_PACKET_COUNT_THRESHOLD:
+            std = Observer.get_signal_without_3std([packet.signal for packet in packets])
+            # std = Observer.get_signal_std([packet.signal for packet in packets])
+            avg = Observer.get_signal_avg([packet.signal for packet in packets])
+            stds.append(std)
+            print len(packets)
+            print "FROM: %s TO: %s STD: %s  AVG: %s SSID: %s" % (packets[0].sa, packets[0].da, std, avg, packets[0].ssid)
+            std_flag = (std < abs(0.1 * avg))
+            for addr in ADDR_WITHE_LIST:
+                if str.lower(str(packets[0].sa)).startswith(addr):
+                    addr_flag = True
+                    break
+            print 'addr flag:', addr_flag
+            print 'std flag:', std_flag
+            if addr_flag and std_flag:
+                flag = True
+
+    if plot_flag:
+        print "plotting..."
+        observer.observe()
+        # observer.print_bin('8a:dc:96:3b:a8:bf')
+
+    return flag
 
 
 class Observer(object):
@@ -104,35 +153,7 @@ def main():
     parser.add_argument('--plot', '-p', metavar='<plot name>')
     args = parser.parse_args()
 
-    file_director, file_name = os.path.split(args.input)
-    plot_name = file_name.split('.')[0]
-
-    print "processing packets..."
-    try:
-        data_packets = read_json(args.input)
-    except ValueError:
-        CONVERT_PCAP_TO_JSON = 'tshark -r ' + str(args.input) + ' -l -n -T json > ' + str(plot_name) + '.json'
-        os.system(CONVERT_PCAP_TO_JSON)
-        data_packets = read_json(str(plot_name) + '.json')
-
-    print "creating observer..."
-    observer = Observer(data_packets, args.observer, plot_name=plot_name)
-
-    packet_bins = observer.sort_in_bins()
-
-    stds = []
-    for addr, packets in packet_bins.iteritems():
-        if len(packets) > VALID_PACKET_COUNT_THRESHOLD:
-            ## std = Observer.get_signal_without_3std([packet.signal for packet in packets])
-            std = Observer.get_signal_std([packet.signal for packet in packets])
-            avg = Observer.get_signal_avg([packet.signal for packet in packets])
-            stds.append(std)
-            print len(packets)
-            print "FROM: %s TO: %s STD: %s  AVG: %s SSID: %s" % (packets[0].sa, packets[0].da, std, avg, packets[0].ssid)
-
-    print "plotting..."
-    observer.observe()
-    observer.print_bin('8a:dc:96:3b:a8:bf')
+    print parse_search_channel_file(args.input, args.observer, args.plot, plot_flag=True)
 
 if __name__ == "__main__":
     main()

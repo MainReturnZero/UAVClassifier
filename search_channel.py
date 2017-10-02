@@ -3,6 +3,7 @@ import subprocess
 import time
 from system_call import get_capture_cmd, find_wifi_interface
 from capture import CaptureOptions
+from observer import parse_search_channel_file
 
 BASE_CMD = '/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport /usr/sbin/airport'
 INFO_COMD = BASE_CMD + ' -I'
@@ -43,4 +44,6 @@ if __name__ == "__main__":
                              other=' '.join(args.other),
                              )
     for i in range(1, 12, 1):
-        search_channel(i, float(args.timeout), options, args.file)
+        print i
+        # search_channel(i, float(args.timeout), options, args.file)
+        print parse_search_channel_file(args.file + '_' + str(i) + '.pcap', 'signal', None, plot_flag=False)
