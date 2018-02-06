@@ -283,7 +283,6 @@ def pattern4_timing():
 
     print len(firsts), len(seconds)
 
-
     times = []
     for i in range(1089):
         if seconds[i]-firsts[i] < 500000:
@@ -291,7 +290,6 @@ def pattern4_timing():
 
     N = len(times)
     n = N/10
-
 
     # Fit a normal distribution to the data:
     mu, std = norm.fit(times)
@@ -306,7 +304,7 @@ def pattern4_timing():
     xmin, xmax = plt.xlim()
     x = np.linspace(xmin, xmax, 100)
     p = norm.pdf(x, mu, std)
-    #plt.plot(x, p, 'k', linewidth=2)
+    # plt.plot(x, p, 'k', linewidth=2)
     title = "Fit results: mu = %.2f,  std = %.2f" % (mu, std)
     plt.title(title)
 

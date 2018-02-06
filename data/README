@@ -1,0 +1,5 @@
+This folder contains all the data we process. Some are originally captured from wireshark, some are processed by our script to filt unrelated data out.
+1. channel_search***.pcap/.json files are the sample data we capture from channel 1-11, I just tried to see if any obvious pattern or difference between different channel.
+2. If the name is with 'lab', that data is collected in Lab, otherwise, the data is collected while the drone is flying. 
+3. All files end with 'data' is filtered data that only contains payload of udp packet
+

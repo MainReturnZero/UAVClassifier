@@ -1,5 +1,9 @@
 *.pyc
-data/*
+data/*.json
+data/*.pcap
+data/*.pcapng
+data/0402_3dr
+data/0829_intel
 .idea/*
 .DS_Store
 doc/Icon*
