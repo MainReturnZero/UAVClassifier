@@ -11,3 +11,6 @@
 09/11/2017:
     1: distance vs. signal strength:
     https://stackoverflow.com/questions/11217674/how-to-calculate-distance-from-wifi-router-using-signal-strength
+
+01/05/2018:
+   line 1201 in parrot_hack_data (packet 1204 in its pcap data) , request-response pattern
