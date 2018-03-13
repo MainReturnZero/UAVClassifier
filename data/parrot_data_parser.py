@@ -1,4 +1,4 @@
-#
+# cat parrot.json | grep data.data > temp
 def multiple_frames_packet():
     with open('temp', 'r') as lines:
         count_long_packet = 0
@@ -15,6 +15,7 @@ def multiple_frames_packet():
         print count_long_packet
         print count_total_packet
         return data_byte_lists
+
 
 def count_each_frame_type(data_byte_lists):
     count_01 = 0

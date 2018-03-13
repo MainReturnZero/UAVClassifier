@@ -5,7 +5,8 @@ import numpy as np
 from scipy.interpolate import UnivariateSpline
 from scipy.stats import norm
 
-INPUT_FILE = "./data/parrot.json"
+#INPUT_FILE = "./data/parrot.json"
+INPUT_FILE = "./data/encrypted_parrot_partial.json"
 
 
 def dict_ignore_on_duplicates(ordered_pairs):
@@ -32,13 +33,13 @@ class Packet(object):
             self._type = int(packet['_source']['layers']['frame']['frame.encap_type'])
             self._type_subtype = int(packet['_source']['layers']['wlan']['wlan.fc_tree']['wlan.fc.subtype'])
             self._mac_time = int(packet['_source']['layers']['wlan_radio']['wlan_radio.timestamp'])
-            self._signal = int(packet['_source']['layers']['wlan_radio']['wlan_radio.signal_dbm'])
+            #self._signal = int(packet['_source']['layers']['wlan_radio']['wlan_radio.signal_dbm'])
             self._channel = int(packet['_source']['layers']['wlan_radio']['wlan_radio.channel'])
-            self._sa = packet['_source']['layers']['wlan']['wlan.sa']
-            self._da = packet['_source']['layers']['wlan']['wlan.da']
-            self._data = packet['_source']['layers']['data']['data.data']
+            #self._sa = packet['_source']['layers']['wlan']['wlan.sa']
+            #self._da = packet['_source']['layers']['wlan']['wlan.da']
+            #self._data = packet['_source']['layers']['data']['data.data']
 
-        except KeyError:
+        except KeyError, e:
             self._packet_size = 0
             self._time_stamp = 0
             self._time_delta = 0
@@ -52,6 +53,7 @@ class Packet(object):
             self._ssid = None
             self._data = ""
             print "BAD PACKETS:", packet['_source']['layers']['frame']['frame.number']
+            print e
 
         try:
             if packet['_source']['layers']['wlan_mgt'].get('wlan_mgt.tagged.all'):
@@ -173,10 +175,11 @@ def sizes_histogram():
 
     sizes = dict()
     for packet in packets:
-        if sizes.has_key(str(packet.packet_size)):
-            sizes[str(packet.packet_size)] += 1
-        else:
-            sizes[str(packet.packet_size)] = 1
+        if packet.packet_size > 100 and packet.packet_size < 200:
+            if sizes.has_key(str(packet.packet_size)):
+                sizes[str(packet.packet_size)] += 1
+            else:
+                sizes[str(packet.packet_size)] = 1
     x = np.arange(len(sizes))
     keylist = sizes.keys()
     keylist.sort()
@@ -338,6 +341,6 @@ def main():
 
 if __name__ == "__main__":
     #main()
-    #sizes_histogram()
+    sizes_histogram()
     #pattern_timing()
-    pattern4_timing()
+    #pattern4_timing()
