@@ -1,12 +1,17 @@
 #!/usr/bin/env python
+'''
+For this file, they are all example code that are mostly used to generate plots from json data. It serves as an example, not final code, you have to modify the function to meet your own requirement.
+'''
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+import math as math
 from scipy.interpolate import UnivariateSpline
 from scipy.stats import norm
 
-#INPUT_FILE = "./data/parrot.json"
-INPUT_FILE = "./data/encrypted_parrot_partial.json"
+INPUT_FILE = "./data/parrot.json"
+INPUT_FILE2 = "./data/parrot_lab.json"
+#INPUT_FILE = "./data/encrypted_parrot_partial.json"
 
 
 def dict_ignore_on_duplicates(ordered_pairs):
@@ -37,7 +42,7 @@ class Packet(object):
             self._channel = int(packet['_source']['layers']['wlan_radio']['wlan_radio.channel'])
             #self._sa = packet['_source']['layers']['wlan']['wlan.sa']
             #self._da = packet['_source']['layers']['wlan']['wlan.da']
-            #self._data = packet['_source']['layers']['data']['data.data']
+            self._data = packet['_source']['layers']['data']['data.data']
 
         except KeyError, e:
             self._packet_size = 0
@@ -229,6 +234,7 @@ def pattern_timing():
 
     N = len(times)
     n = N/10
+    print N
     '''
     #times.sort()
     p, x = np.histogram(times, bins=n)
@@ -255,6 +261,8 @@ def pattern_timing():
     plt.plot(x, p, 'k', linewidth=2)
     title = "Fit results: mu = %.2f,  std = %.2f" % (mu, std)
     plt.title(title)
+    plt.ylabel("Density after normalized")
+    plt.xlabel("Time interval (ms)")
 
     plt.show()
 
@@ -322,25 +330,306 @@ def main():
        packets.append(packet)
 
    sizes = set()
-   times = []
+   times_127 = []
+   times_133 = []
+   times_134 = []
+   times_137 = []
    count = 0.0
    c = 0.0
    for packet in packets:
-       sizes.add(packet.packet_size)
+       #sizes.add(packet.packet_size)
        if packet.packet_size == 137:
            count += 1
-           times.append(packet.time_delta)
+           if packet.time_delta < 0.03:
+               times_137.append(packet.time_delta)
            if abs(packet.time_delta -0.05) < 0.01:
                c += 1
        # print packet.packet_size, packet.time_stamp, packet.type
-   print c/count
-   times.sort()
-   plt.plot(times, '.')
+       if packet.packet_size == 127:
+           times_127.append(packet.time_delta)
+       if packet.packet_size == 133:
+           times_133.append(packet.time_delta)
+       if packet.packet_size == 134:
+           times_134.append(packet.time_delta)
+   #print c/count
+   if len(times_127) < len(times_133):
+       del times_133[len(times_127):]
+   else:
+       del times_127[len(times_133):]
+
+   if len(times_134) < len(times_137):
+       del times_137[len(times_134):]
+   else:
+       del times_134[len(times_137):]
+
+   times_127.sort()
+   times_133.sort()
+   times_134.sort()
+   times_137.sort()
+
+   fig = plt.figure()
+   ax = fig.add_subplot(1,1,1)
+   ax1 = fig.add_subplot(2,2,1)
+   ax2 = fig.add_subplot(2,2,3)
+   ax3 = fig.add_subplot(2,2,2)
+   ax4 = fig.add_subplot(2,2,4)
+   ax1.plot(times_127, 'r-', label='Parrot Type 1')
+   ax1.plot(times_133, 'g-', label='Parrot Type 1')
+   ax1.legend(loc='upper left')
+   ax2.plot(times_134, 'r-', label='Parrot Type 1')
+   ax2.plot(times_137, 'g-', label='Solo Type 1')
+   ax2.legend(loc='upper left')
+
+   p1 = [(i, times_127[i]) for i in range(0, len(times_127), 20)]
+   q1 = [(i, times_133[i]) for i in range(0, len(times_133), 20)]
+   p2 = [(i, times_134[i]) for i in range(0, len(times_134), 20)]
+   q2 = [(i, times_137[i]) for i in range(0, len(times_137), 20)]
+   m1 = np.mean(times_127+times_133)
+   m2 = np.mean(times_134+times_137)
+
+   data_packets = read_json(INPUT_FILE2)
+   packets = []
+   for data_packet in data_packets:
+       packet = Packet(data_packet)
+       packets.append(packet)
+
+   sizes = set()
+   times_127 = []
+   times_133 = []
+   times_134 = []
+   times_137 = []
+   count = 0.0
+   c = 0.0
+   for packet in packets:
+       #sizes.add(packet.packet_size)
+       if packet.packet_size == 137:
+           count += 1
+           times_137.append(packet.time_delta)
+           if abs(packet.time_delta -0.05) < 0.01:
+               c += 1
+       #print packet.packet_size, packet.time_stamp, packet.type
+       if packet.packet_size == 127:
+           times_127.append(packet.time_delta)
+       if packet.packet_size == 133:
+           times_133.append(packet.time_delta)
+       if packet.packet_size == 134:
+           times_134.append(packet.time_delta)
+   #print c/count
+   if len(times_127) < len(times_133):
+       del times_133[len(times_127):]
+   else:
+       del times_127[len(times_133):]
+
+   if len(times_134) < len(times_137):
+       del times_137[len(times_134):]
+   else:
+       del times_134[len(times_137):]
+
+   times_127.sort()
+   times_133.sort()
+   times_134.sort()
+   times_137.sort()
+
+   ax3.plot(times_127, 'r-', label='Parrot Type 2')
+   ax3.plot(times_133, 'g-', label='Parrot Type 2')
+   ax3.legend(loc='upper left')
+   ax4.plot(times_134, 'r-', label='Parrot Type2')
+   ax4.plot(times_137, 'g-', label='Solo Type2')
+   ax4.legend(loc='upper left')
+
+   # Turn off axis lines and ticks of the big subplot
+   ax.spines['top'].set_color('none')
+   ax.spines['bottom'].set_color('none')
+   ax.spines['left'].set_color('none')
+   ax.spines['right'].set_color('none')
+   ax.tick_params(labelcolor='w', top='off', bottom='off', left='off', right='off')
+
+   # Set common labels
+   ax.set_xlabel('Packet Index')
+   ax.set_ylabel('Time Interval (ms)')
+
+   p3 = [(i, times_127[i]) for i in range(0, len(times_127), 20)]
+   q3 = [(i, times_133[i]) for i in range(0, len(times_133), 20)]
+   p4 = [(i, times_134[i]) for i in range(0, len(times_134), 20)]
+   q4 = [(i, times_137[i]) for i in range(0, len(times_137), 20)]
+   m3 = np.mean(times_127+times_133)
+   m4 = np.mean(times_134+times_137)
+   d1= m1/frechetDist(p1, q1)
+   d2= m2/frechetDist(p2, q2)
+   d3= m3/frechetDist(p3, q3)
+   d4= m4/frechetDist(p4, q4)
+   ax1.set_title('Similarity = ' + '{}'.format(d1), fontsize=7)
+   ax2.set_xlabel('Similarity = ' + '{}'.format(d2), fontsize=7)
+   ax3.set_title('Similarity = ' + '{}'.format(d3), fontsize=7)
+   ax4.set_xlabel('Similarity = ' + '{}'.format(d4), fontsize=7)
    plt.show()
 
 
+# Euclidean distance.
+def euc_dist(pt1,pt2):
+    return math.sqrt((pt2[0]-pt1[0])*(pt2[0]-pt1[0])+(pt2[1]-pt1[1])*(pt2[1]-pt1[1]))
+
+
+def _c(ca,i,j,P,Q):
+    if ca[i,j] > -1:
+        return ca[i,j]
+    elif i == 0 and j == 0:
+        ca[i,j] = euc_dist(P[0],Q[0])
+    elif i > 0 and j == 0:
+        ca[i,j] = max(_c(ca,i-1,0,P,Q),euc_dist(P[i],Q[0]))
+    elif i == 0 and j > 0:
+        ca[i,j] = max(_c(ca,0,j-1,P,Q),euc_dist(P[0],Q[j]))
+    elif i > 0 and j > 0:
+        ca[i,j] = max(min(_c(ca,i-1,j,P,Q),_c(ca,i-1,j-1,P,Q),_c(ca,i,j-1,P,Q)),euc_dist(P[i],Q[j]))
+    else:
+        ca[i,j] = float("inf")
+    return ca[i,j]
+
+""" Computes the discrete frechet distance between two polygonal lines
+Algorithm: http://www.kr.tuwien.ac.at/staff/eiter/et-archive/cdtr9464.pdf
+P and Q are arrays of 2-element arrays (points)
+"""
+
+
+def frechetDist(P,Q):
+    ca = np.ones((len(P),len(Q)))
+    ca = np.multiply(ca,-1)
+    return _c(ca,len(P)-1,len(Q)-1,P,Q)
+
+
+def main1():
+    data_packets = read_json(INPUT_FILE)
+    packets = []
+    for data_packet in data_packets:
+        packet = Packet(data_packet)
+        packets.append(packet)
+
+    sizes = set()
+    times_127 = []
+    times_133 = []
+    times_134 = []
+    times_137 = []
+    count = 0.0
+    c = 0.0
+    for packet in packets:
+        #sizes.add(packet.packet_size)
+        if packet.packet_size == 137:
+            count += 1
+            if packet.time_delta < 0.03:
+                times_137.append(packet.time_delta)
+            if abs(packet.time_delta -0.05) < 0.01:
+                c += 1
+        # print packet.packet_size, packet.time_stamp, packet.type
+        if packet.packet_size == 127:
+            times_127.append(packet.time_delta)
+        if packet.packet_size == 133:
+            times_133.append(packet.time_delta)
+        if packet.packet_size == 134:
+            times_134.append(packet.time_delta)
+    #print c/count
+    if len(times_127) < len(times_133):
+        del times_133[len(times_127):]
+    else:
+        del times_127[len(times_133):]
+
+    if len(times_134) < len(times_137):
+        del times_137[len(times_134):]
+    else:
+        del times_134[len(times_137):]
+
+    times_127.sort()
+    times_133.sort()
+    times_134.sort()
+    times_137.sort()
+
+    plt.plot(times_134, 'r-', label='Parrot Rank 1 - Trace 1')
+    plt.plot(times_137, 'g-', label='Solo Rank 1 - Trace 1')
+    plt.legend(loc='upper left')
+    plt.xlabel("Packet Index")
+    plt.ylabel("Time Interval (ms)")
+    #plt.title("(c) Curve comparison between Rank 1 Packet from different drones")
+    p1 = [(i, times_127[i]) for i in range(0, len(times_127), 20)]
+    q1 = [(i, times_133[i]) for i in range(0, len(times_133), 20)]
+    p2 = [(i, times_134[i]) for i in range(0, len(times_134), 20)]
+    q2 = [(i, times_137[i]) for i in range(0, len(times_137), 20)]
+    m1 = np.mean(times_127+times_133)
+    m2 = np.mean(times_134+times_137)
+    d1= m1/frechetDist(p1, q1)
+    d2= m2/frechetDist(p2, q2)
+    plt.text(500, 0.075, 'Similarity = ' + '{}'.format(d2), fontsize=10)
+
+    plt.show()
+
+    data_packets = read_json(INPUT_FILE2)
+    packets = []
+    for data_packet in data_packets:
+        packet = Packet(data_packet)
+        packets.append(packet)
+
+    sizes = set()
+    times_127 = []
+    times_133 = []
+    times_134 = []
+    times_137 = []
+    count = 0.0
+    c = 0.0
+    for packet in packets:
+        #sizes.add(packet.packet_size)
+        if packet.packet_size == 137:
+            count += 1
+            times_137.append(packet.time_delta)
+            if abs(packet.time_delta -0.05) < 0.01:
+                c += 1
+        #print packet.packet_size, packet.time_stamp, packet.type
+        if packet.packet_size == 127:
+            times_127.append(packet.time_delta)
+        if packet.packet_size == 133:
+            times_133.append(packet.time_delta)
+        if packet.packet_size == 134:
+            times_134.append(packet.time_delta)
+    #print c/count
+    if len(times_127) < len(times_133):
+        del times_133[len(times_127):]
+    else:
+        del times_127[len(times_133):]
+
+    if len(times_134) < len(times_137):
+        del times_137[len(times_134):]
+    else:
+        del times_134[len(times_137):]
+
+    times_127.sort()
+    times_133.sort()
+    times_134.sort()
+    times_137.sort()
+
+    plt.plot(times_134, 'r-', label='Parrot Rank 2 - Trace 1')
+    plt.plot(times_137, 'g-', label='Solo Rank 2 - Trace 1')
+    plt.legend(loc='upper left')
+    plt.xlabel("Packet Index")
+    plt.ylabel("Time Interval (ms)")
+    #plt.title("(d) Curve comparison between Rank 2 Packet from different drones")
+
+    p3 = [(i, times_127[i]) for i in range(0, len(times_127), 20)]
+    q3 = [(i, times_133[i]) for i in range(0, len(times_133), 20)]
+    p4 = [(i, times_134[i]) for i in range(0, len(times_134), 20)]
+    q4 = [(i, times_137[i]) for i in range(0, len(times_137), 20)]
+    m3 = np.mean(times_127+times_133)
+    m4 = np.mean(times_134+times_137)
+    d3= m3/frechetDist(p3, q3)
+    d4= m4/frechetDist(p4, q4)
+    plt.text(200, 0.05, 'Similarity = ' + '{}'.format(d4), fontsize=10)
+    '''
+    ax1.set_title('Similarity = ' + '{}'.format(d1), fontsize=7)
+    ax2.set_xlabel('Similarity = ' + '{}'.format(d2), fontsize=7)
+    ax3.set_title('Similarity = ' + '{}'.format(d3), fontsize=7)
+    ax4.set_xlabel('Similarity = ' + '{}'.format(d4), fontsize=7)
+    '''
+    plt.show()
+
 if __name__ == "__main__":
-    #main()
-    sizes_histogram()
+    main1()
+    #sizes_histogram()
     #pattern_timing()
     #pattern4_timing()
+    #print frechetDist()
